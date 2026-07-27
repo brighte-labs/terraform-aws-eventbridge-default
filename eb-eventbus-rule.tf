@@ -1,45 +1,53 @@
 # https://docs.aws.amazon.com/eventbridge/latest/userguide/event-types.html
-resource aws_cloudformation_stack eventbus_rule_custom {
-  count      = var.custom_eb_exist ? 0 : var.required_custom_bus ? var.enable_org_access ? 0 : length(var.eventbus_rules) : 0
+locals {
+  eventbus_rules_by_name = {
+    for rule in var.eventbus_rules : rule => rule
+  }
+}
+
+resource "aws_cloudformation_stack" "eventbus_rule_custom_by_name" {
+  for_each = var.custom_eb_exist ? {} : var.required_custom_bus ? var.enable_org_access ? {} : local.eventbus_rules_by_name : {}
+
   depends_on = [aws_cloudformation_stack.eventbus, aws_cloudformation_stack.eventbus_policy]
-  name       = "eb-rules-${var.eventbus_rules[count.index]}"
+  name       = "eb-rules-${each.key}"
   parameters = {
     ConfigurationEBNameParam     = "${var.bus_name}"
-    ConfigurationEBRuleNameParam = lookup(var.eventbus_event_pattern[var.eventbus_rules[count.index]], "rulename")
-    DescriptionParam             = lookup(var.eventbus_event_pattern[var.eventbus_rules[count.index]], "description")
+    ConfigurationEBRuleNameParam = lookup(var.eventbus_event_pattern[each.key], "rulename")
+    DescriptionParam             = lookup(var.eventbus_event_pattern[each.key], "description")
     EventPatternState            = var.eventbus_rule_state
-    EventRuleTargetArn           = lookup(var.eventbus_event_pattern[var.eventbus_rules[count.index]], "target")
-    EventRuleTargetID            = lookup(var.eventbus_event_pattern[var.eventbus_rules[count.index]], "id")
+    EventRuleTargetArn           = lookup(var.eventbus_event_pattern[each.key], "target")
+    EventRuleTargetID            = lookup(var.eventbus_event_pattern[each.key], "id")
   }
-  template_body = lookup(var.eventbus_event_pattern[var.eventbus_rules[count.index]], "file")
+  template_body = lookup(var.eventbus_event_pattern[each.key], "file")
 }
 
-resource aws_cloudformation_stack eventbus_rule_custom_org {
-  count      = var.custom_eb_exist ? 0 : var.enable_org_access ? length(var.eventbus_rules) : 0
+resource "aws_cloudformation_stack" "eventbus_rule_custom_org_by_name" {
+  for_each = var.custom_eb_exist ? {} : var.enable_org_access ? local.eventbus_rules_by_name : {}
+
   depends_on = [aws_cloudformation_stack.eventbus, aws_cloudformation_stack.eventbus_policy]
-  name       = "eb-rules-${var.eventbus_rules[count.index]}"
+  name       = "eb-rules-${each.key}"
   parameters = {
     ConfigurationEBNameParam     = "${var.bus_name}"
-    ConfigurationEBRuleNameParam = lookup(var.eventbus_event_pattern[var.eventbus_rules[count.index]], "rulename")
-    DescriptionParam             = lookup(var.eventbus_event_pattern[var.eventbus_rules[count.index]], "description")
+    ConfigurationEBRuleNameParam = lookup(var.eventbus_event_pattern[each.key], "rulename")
+    DescriptionParam             = lookup(var.eventbus_event_pattern[each.key], "description")
     EventPatternState            = var.eventbus_rule_state
-    EventRuleTargetArn           = lookup(var.eventbus_event_pattern[var.eventbus_rules[count.index]], "target")
-    EventRuleTargetID            = lookup(var.eventbus_event_pattern[var.eventbus_rules[count.index]], "id")
+    EventRuleTargetArn           = lookup(var.eventbus_event_pattern[each.key], "target")
+    EventRuleTargetID            = lookup(var.eventbus_event_pattern[each.key], "id")
   }
-  template_body = lookup(var.eventbus_event_pattern[var.eventbus_rules[count.index]], "file")
+  template_body = lookup(var.eventbus_event_pattern[each.key], "file")
 }
 
-resource aws_cloudformation_stack eventbus_rule_custom_existing {
-  count = var.custom_eb_exist ? length(var.eventbus_rules) : 0
-  name  = "eb-rules-${var.eventbus_rules[count.index]}"
+resource "aws_cloudformation_stack" "eventbus_rule_custom_existing_by_name" {
+  for_each = var.custom_eb_exist ? local.eventbus_rules_by_name : {}
+
+  name = "eb-rules-${each.key}"
   parameters = {
     ConfigurationEBNameParam     = "${var.bus_name}"
-    ConfigurationEBRuleNameParam = lookup(var.eventbus_event_pattern[var.eventbus_rules[count.index]], "rulename")
-    DescriptionParam             = lookup(var.eventbus_event_pattern[var.eventbus_rules[count.index]], "description")
+    ConfigurationEBRuleNameParam = lookup(var.eventbus_event_pattern[each.key], "rulename")
+    DescriptionParam             = lookup(var.eventbus_event_pattern[each.key], "description")
     EventPatternState            = var.eventbus_rule_state
-    EventRuleTargetArn           = lookup(var.eventbus_event_pattern[var.eventbus_rules[count.index]], "target")
-    EventRuleTargetID            = lookup(var.eventbus_event_pattern[var.eventbus_rules[count.index]], "id")
+    EventRuleTargetArn           = lookup(var.eventbus_event_pattern[each.key], "target")
+    EventRuleTargetID            = lookup(var.eventbus_event_pattern[each.key], "id")
   }
-  template_body = lookup(var.eventbus_event_pattern[var.eventbus_rules[count.index]], "file")
+  template_body = lookup(var.eventbus_event_pattern[each.key], "file")
 }
-
