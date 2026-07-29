@@ -31,14 +31,6 @@ eventbus_rules list
 Description: A list of eventbus ruls to create in this account ( Pre-defined pattern by service)
 
 Default: []
-
-State migration note
-
-EventBridge rule stacks are keyed by rule name. Consumers upgrading from a
-version that used indexed `eventbus_rule_custom*` resources should migrate
-existing CloudFormation stacks into the corresponding `*_by_name` resource
-addresses before applying, for example with Terraform `removed` and `import`
-blocks in the calling configuration.
 org_id string
 
 Description: ID for this organization
