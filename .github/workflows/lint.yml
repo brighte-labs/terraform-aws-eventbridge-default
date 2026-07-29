@@ -24,6 +24,7 @@ jobs:
     runs-on: macOS-latest
     steps:
       - uses: actions/checkout@master
+      - uses: hashicorp/setup-terraform@v3
       - name: Install Deps
         run: brew update && brew install pre-commit terraform-docs
       - name: Check Docs
