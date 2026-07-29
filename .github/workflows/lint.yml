@@ -25,8 +25,6 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - name: Install Deps
-        run: brew update && brew install pre-commit terraform-docs terraform
+        run: brew update && brew install pre-commit terraform-docs
       - name: Check Docs
         run: pre-commit run --show-diff-on-failure --all-files terraform_docs
-
-  
